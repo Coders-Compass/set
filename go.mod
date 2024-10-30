@@ -1,3 +1,3 @@
-module github.com/Coders-Compass/set
+module coderscompass.org/set
 
 go 1.23.2
