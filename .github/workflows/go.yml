@@ -70,14 +70,6 @@ jobs:
       - name: Run staticcheck
         run: staticcheck ./...
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.txt
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
-
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
