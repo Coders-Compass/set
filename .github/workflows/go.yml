@@ -1,0 +1,91 @@
+name: Go Code Quality & Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Verify and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          check-latest: true
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          go mod download
+          # Install analysis tools
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          go install github.com/sonatype-nexus-community/nancy@latest
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Run go fmt
+        run: |
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+            echo "The following files are not properly formatted:"
+            gofmt -s -l .
+            exit 1
+          fi
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run Tests
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Generate Documentation
+        run: |
+          go doc -all > documentation.txt
+          if [ ! -s documentation.txt ]; then
+            echo "Documentation generation failed or is empty"
+            exit 1
+          fi
+
+      - name: Run gosec
+        run: gosec -exclude-dir=vendor ./...
+
+      - name: Run nancy
+        run: |
+          go list -json -deps ./... | nancy sleuth
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=5m
+
+      - name: Run staticcheck
+        run: staticcheck ./...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.txt
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: coverage.txt
+
+      - name: Archive documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation
+          path: documentation.txt
