@@ -76,8 +76,8 @@ func main() {
 | **Operation**    | **Time Complexity** |
 |------------------|---------------------|
 | Insert           | O(1)                |
-| Intersection     | O(min(n,m))         |
-| Equals           | O(min(n,m))         |
+| Intersection     | O(m + n)            |
+| Equals           | O(min(n, m))        |
 
 ## Getting help
 
