@@ -105,9 +105,8 @@ For security concerns, please review our [Security Policy](SECURITY.md).
 
 ## Learning Resources
 
-- [Set Theory Book](https://coderscompass.org/books/set-theory-for-beginners): Comprehensive guide to set theory concepts
+- [Set Theory Book](https://coderscompass.org/books/set-theory-for-beginners?utm_campaign=presentation&utm_source=github): Comprehensive guide to set theory concepts
 - [pkg.go.dev Documentation](https://pkg.go.dev/coderscompass.org/set): API reference
-- [Project Wiki](https://github.com/Coders-Compass/set/wiki): Additional examples and tutorials
 
 ## License
 
