@@ -6,10 +6,13 @@ import (
 	"strings"
 )
 
+// hashSet implements the Set interface using a map for O(1) operations.
+// The empty struct value for map entries uses no additional memory.
 type hashSet[T comparable] struct {
 	elements map[T]struct{}
 }
 
+// NewHashSet creates and returns a new empty set.
 func NewHashSet[T comparable]() Set[T] {
 	return &hashSet[T]{
 		elements: make(map[T]struct{}),
@@ -52,6 +55,7 @@ func (h *hashSet[T]) String() string {
 
 	elems := h.ToSlice()
 
+	// We'll sort the elements if they are strings.
 	if len(elems) > 0 {
 		if _, ok := any(elems[0]).(string); ok {
 			strElems := make([]string, len(elems))
