@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '17 15 * * 4'
+    - cron: "17 15 * * 4"
   workflow_dispatch:
 
 jobs:
@@ -65,7 +65,7 @@ jobs:
           go list -json -deps ./... | nancy sleuth
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
         with:
           version: latest
           args: --timeout=5m
