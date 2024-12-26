@@ -207,20 +207,11 @@ func TestLargeSets(t *testing.T) {
 			if !result.Equals(expected) {
 				t.Errorf("%s: intersection size expected %d, got %d",
 					tt.name,
-					getSize(expected),
-					getSize(result))
+					expected.Cardinality(),
+					result.Cardinality())
 			}
 		})
 	}
-}
-
-// Helper function to get size of a set
-func getSize[T comparable](s Set[T]) int {
-	// Type assert to access the underlying map
-	if hs, ok := s.(*hashSet[T]); ok {
-		return len(hs.elements)
-	}
-	return 0
 }
 
 func TestSpecialValues(t *testing.T) {
@@ -657,3 +648,256 @@ func TestCartesianProduct(t *testing.T) {
 		}
 	})
 }
+
+func TestSetRelations(t *testing.T) {
+	tests := []struct {
+		name          string
+		set1Elements  []int
+		set2Elements  []int
+		isSubset      bool
+		isSuperset    bool
+		isProperSub   bool
+		isProperSuper bool
+	}{
+		{
+			name:          "empty sets",
+			set1Elements:  []int{},
+			set2Elements:  []int{},
+			isSubset:      true,  // empty set is subset of itself
+			isSuperset:    true,  // empty set is superset of itself
+			isProperSub:   false, // not proper subset as they're equal
+			isProperSuper: false, // not proper superset as they're equal
+		},
+		{
+			name:          "subset proper",
+			set1Elements:  []int{1, 2},
+			set2Elements:  []int{1, 2, 3},
+			isSubset:      true,
+			isSuperset:    false,
+			isProperSub:   true,
+			isProperSuper: false,
+		},
+		{
+			name:          "superset proper",
+			set1Elements:  []int{1, 2, 3},
+			set2Elements:  []int{1, 2},
+			isSubset:      false,
+			isSuperset:    true,
+			isProperSub:   false,
+			isProperSuper: true,
+		},
+		{
+			name:          "disjoint sets",
+			set1Elements:  []int{1, 2},
+			set2Elements:  []int{3, 4},
+			isSubset:      false,
+			isSuperset:    false,
+			isProperSub:   false,
+			isProperSuper: false,
+		},
+		{
+			name:          "equal sets",
+			set1Elements:  []int{1, 2, 3},
+			set2Elements:  []int{1, 2, 3},
+			isSubset:      true,
+			isSuperset:    true,
+			isProperSub:   false,
+			isProperSuper: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			set1 := NewHashSet[int]()
+			set2 := NewHashSet[int]()
+
+			for _, elem := range tt.set1Elements {
+				set1.Insert(elem)
+			}
+			for _, elem := range tt.set2Elements {
+				set2.Insert(elem)
+			}
+
+			if got := set1.IsSubsetOf(set2); got != tt.isSubset {
+				t.Errorf("IsSubsetOf() = %v, want %v", got, tt.isSubset)
+			}
+			if got := set1.IsSupersetOf(set2); got != tt.isSuperset {
+				t.Errorf("IsSupersetOf() = %v, want %v", got, tt.isSuperset)
+			}
+			if got := set1.IsProperSubsetOf(set2); got != tt.isProperSub {
+				t.Errorf("IsProperSubsetOf() = %v, want %v", got, tt.isProperSub)
+			}
+			if got := set1.IsProperSupersetOf(set2); got != tt.isProperSuper {
+				t.Errorf("IsProperSupersetOf() = %v, want %v", got, tt.isProperSuper)
+			}
+		})
+	}
+}
+
+func TestPowerSet(t *testing.T) {
+	tests := []struct {
+		name          string
+		elements      []int
+		expectedSize  int
+		checkElements [][]int
+	}{
+		{
+			name:         "empty set",
+			elements:     []int{},
+			expectedSize: 1, // just empty set
+			checkElements: [][]int{
+				{},
+			},
+		},
+		{
+			name:         "singleton",
+			elements:     []int{1},
+			expectedSize: 2,
+			checkElements: [][]int{
+				{},
+				{1},
+			},
+		},
+		{
+			name:         "two elements",
+			elements:     []int{1, 2},
+			expectedSize: 4,
+			checkElements: [][]int{
+				{},
+				{1},
+				{2},
+				{1, 2},
+			},
+		},
+		{
+			name:         "three elements",
+			elements:     []int{1, 2, 3},
+			expectedSize: 8,
+			checkElements: [][]int{
+				{},
+				{1},
+				{2},
+				{3},
+				{1, 2},
+				{1, 3},
+				{2, 3},
+				{1, 2, 3},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create input set
+			input := NewHashSet[int]()
+			for _, elem := range tt.elements {
+				input.Insert(elem)
+			}
+
+			// Get power set
+			powerSet := PowerSet(input)
+
+			// Check size
+			if powerSet.Cardinality() != tt.expectedSize {
+				t.Errorf("PowerSet() size = %v, want %v", powerSet.Cardinality(), tt.expectedSize)
+			}
+
+			// Check expected elements
+			for _, expectedElements := range tt.checkElements {
+				found := false
+				expectedSet := NewHashSet[int]()
+				for _, elem := range expectedElements {
+					expectedSet.Insert(elem)
+				}
+
+				for _, subset := range powerSet.ToSlice() {
+					if subset.Equals(expectedSet) {
+						found = true
+						break
+					}
+				}
+
+				if !found {
+					t.Errorf("PowerSet() missing expected subset %v", expectedElements)
+				}
+			}
+		})
+	}
+}
+
+func TestStringErrorHandling(t *testing.T) {
+	// Test panic recovery when attempting type assertion on non-string type
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("String() with mixed types should panic")
+		}
+	}()
+
+	set := NewHashSet[interface{}]()
+	set.Insert("string")
+	set.Insert(42) // Add non-string element
+	_ = set.String()
+}
+
+func TestTypeAssertionPanics(t *testing.T) {
+	tests := []struct {
+		name string
+		fn   func()
+	}{
+		{
+			name: "Equals with wrong type",
+			fn: func() {
+				s1 := NewHashSet[int]()
+				var s2 Set[int] = &mockSet[int]{} // Different implementation
+				s1.Equals(s2)
+			},
+		},
+		{
+			name: "IsSubsetOf with wrong type",
+			fn: func() {
+				s1 := NewHashSet[int]()
+				var s2 Set[int] = &mockSet[int]{}
+				s1.IsSubsetOf(s2)
+			},
+		},
+		{
+			name: "IsSupersetOf with wrong type",
+			fn: func() {
+				s1 := NewHashSet[int]()
+				var s2 Set[int] = &mockSet[int]{}
+				s1.IsSupersetOf(s2)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r == nil {
+					t.Errorf("%s should panic", tt.name)
+				}
+			}()
+			tt.fn()
+		})
+	}
+}
+
+// mockSet implements Set interface for testing type assertion panics
+type mockSet[T comparable] struct{}
+
+func (m *mockSet[T]) Insert(elem T)                           {}
+func (m *mockSet[T]) Remove(elem T)                           {}
+func (m *mockSet[T]) Contains(elem T) bool                    { return false }
+func (m *mockSet[T]) Cardinality() int                        { return 0 }
+func (m *mockSet[T]) IsEmpty() bool                           { return true }
+func (m *mockSet[T]) Equals(other Set[T]) bool                { return false }
+func (m *mockSet[T]) IsSubsetOf(other Set[T]) bool            { return false }
+func (m *mockSet[T]) IsSupersetOf(other Set[T]) bool          { return false }
+func (m *mockSet[T]) IsProperSubsetOf(other Set[T]) bool      { return false }
+func (m *mockSet[T]) IsProperSupersetOf(other Set[T]) bool    { return false }
+func (m *mockSet[T]) Union(other Set[T]) Set[T]               { return nil }
+func (m *mockSet[T]) Intersection(other Set[T]) Set[T]        { return nil }
+func (m *mockSet[T]) Difference(other Set[T]) Set[T]          { return nil }
+func (m *mockSet[T]) SymmetricDifference(other Set[T]) Set[T] { return nil }
+func (m *mockSet[T]) ToSlice() []T                            { return nil }
+func (m *mockSet[T]) String() string                          { return "" }
