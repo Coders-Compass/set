@@ -408,3 +408,252 @@ func BenchmarkIntersection(b *testing.B) {
 		}
 	}
 }
+
+func TestBasicOperations(t *testing.T) {
+	tests := []struct {
+		name string
+		ops  []struct {
+			op    string
+			elem  int
+			check bool
+		}
+		expectedCard int
+		isEmpty      bool
+	}{
+		{
+			name: "empty set operations",
+			ops: []struct {
+				op    string
+				elem  int
+				check bool
+			}{
+				{"contains", 1, false},
+				{"insert", 1, true},
+				{"contains", 1, true},
+				{"remove", 1, false},
+				{"contains", 1, false},
+			},
+			expectedCard: 0,
+			isEmpty:      true,
+		},
+		{
+			name: "multiple elements",
+			ops: []struct {
+				op    string
+				elem  int
+				check bool
+			}{
+				{"insert", 1, true},
+				{"insert", 2, true},
+				{"insert", 3, true},
+				{"contains", 2, true},
+				{"remove", 2, false},
+				{"contains", 2, false},
+			},
+			expectedCard: 2,
+			isEmpty:      false,
+		},
+		{
+			name: "duplicate elements",
+			ops: []struct {
+				op    string
+				elem  int
+				check bool
+			}{
+				{"insert", 1, true},
+				{"insert", 1, true},
+				{"contains", 1, true},
+			},
+			expectedCard: 1,
+			isEmpty:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			set := NewHashSet[int]()
+
+			for _, op := range tt.ops {
+				switch op.op {
+				case "insert":
+					set.Insert(op.elem)
+				case "remove":
+					set.Remove(op.elem)
+				case "contains":
+					if got := set.Contains(op.elem); got != op.check {
+						t.Errorf("Contains(%v) = %v, want %v", op.elem, got, op.check)
+					}
+				}
+			}
+
+			if got := set.Cardinality(); got != tt.expectedCard {
+				t.Errorf("Cardinality() = %v, want %v", got, tt.expectedCard)
+			}
+
+			if got := set.IsEmpty(); got != tt.isEmpty {
+				t.Errorf("IsEmpty() = %v, want %v", got, tt.isEmpty)
+			}
+		})
+	}
+}
+
+func TestString(t *testing.T) {
+	tests := []struct {
+		name     string
+		elements []string
+		want     string
+	}{
+		{
+			name:     "empty set",
+			elements: []string{},
+			want:     "{}",
+		},
+		{
+			name:     "single element",
+			elements: []string{"a"},
+			want:     "{a}",
+		},
+		{
+			name:     "multiple elements",
+			elements: []string{"c", "a", "b"},
+			want:     "{a, b, c}", // Should be sorted
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			set := NewHashSet[string]()
+			for _, elem := range tt.elements {
+				set.Insert(elem)
+			}
+
+			if got := set.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSetOperations(t *testing.T) {
+	t.Run("book genres example", func(t *testing.T) {
+		sciFi := NewHashSet[string]()
+		for _, book := range []string{"Dune", "Neuromancer", "Altered Carbon", "The Caves of Steel"} {
+			sciFi.Insert(book)
+		}
+
+		mystery := NewHashSet[string]()
+		for _, book := range []string{"The Hound of the Baskervilles", "Altered Carbon", "Gone Girl", "The Caves of Steel"} {
+			mystery.Insert(book)
+		}
+
+		// Test Union
+		union := sciFi.Union(mystery)
+		expectedUnion := []string{
+			"Dune", "Neuromancer", "Altered Carbon", "The Caves of Steel",
+			"The Hound of the Baskervilles", "Gone Girl",
+		}
+		for _, book := range expectedUnion {
+			if !union.Contains(book) {
+				t.Errorf("Union should contain %s", book)
+			}
+		}
+		if union.Cardinality() != len(expectedUnion) {
+			t.Errorf("Union should have %d elements, got %d", len(expectedUnion), union.Cardinality())
+		}
+
+		// Test Difference (sciFi \ mystery)
+		diff := sciFi.Difference(mystery)
+		expectedDiff := []string{"Dune", "Neuromancer"}
+		for _, book := range expectedDiff {
+			if !diff.Contains(book) {
+				t.Errorf("Difference should contain %s", book)
+			}
+		}
+		if diff.Cardinality() != len(expectedDiff) {
+			t.Errorf("Difference should have %d elements, got %d", len(expectedDiff), diff.Cardinality())
+		}
+
+		// Test Symmetric Difference
+		symDiff := sciFi.SymmetricDifference(mystery)
+		expectedSymDiff := []string{
+			"Dune", "Neuromancer",
+			"The Hound of the Baskervilles", "Gone Girl",
+		}
+		for _, book := range expectedSymDiff {
+			if !symDiff.Contains(book) {
+				t.Errorf("Symmetric difference should contain %s", book)
+			}
+		}
+		if symDiff.Cardinality() != len(expectedSymDiff) {
+			t.Errorf("Symmetric difference should have %d elements, got %d", len(expectedSymDiff), symDiff.Cardinality())
+		}
+	})
+
+	t.Run("special cases", func(t *testing.T) {
+		empty := NewHashSet[int]()
+		nonEmpty := NewHashSet[int]()
+		nonEmpty.Insert(1)
+		nonEmpty.Insert(2)
+
+		unionWithEmpty := nonEmpty.Union(empty)
+		if !unionWithEmpty.Equals(nonEmpty) {
+			t.Error("Union with empty set should equal the non-empty set")
+		}
+
+		diffWithEmpty := nonEmpty.Difference(empty)
+		if !diffWithEmpty.Equals(nonEmpty) {
+			t.Error("Difference with empty set should equal the original set")
+		}
+
+		emptyDiff := empty.Difference(nonEmpty)
+		if !emptyDiff.IsEmpty() {
+			t.Error("Empty set difference should be empty")
+		}
+
+		symDiffWithEmpty := nonEmpty.SymmetricDifference(empty)
+		if !symDiffWithEmpty.Equals(nonEmpty) {
+			t.Error("Symmetric difference with empty set should equal the non-empty set")
+		}
+	})
+}
+
+func TestCartesianProduct(t *testing.T) {
+	// Test using the outfits example from the book
+	t.Run("outfits example", func(t *testing.T) {
+		// Create set of shirts: Navy (N), Maroon (M), White (W)
+		shirts := NewHashSet[string]()
+		for _, shirt := range []string{"N", "M", "W"} {
+			shirts.Insert(shirt)
+		}
+
+		// Create set of trousers: Black (BK), Brown (BN)
+		trousers := NewHashSet[string]()
+		for _, trouser := range []string{"BK", "BN"} {
+			trousers.Insert(trouser)
+		}
+
+		// Calculate Cartesian product using the standalone function
+		outfits := CartesianProduct(shirts, trousers)
+
+		// Should have 6 possible outfits (3 shirts × 2 trousers)
+		if outfits.Cardinality() != 6 {
+			t.Errorf("Expected 6 outfits, got %d", outfits.Cardinality())
+		}
+
+		// Check specific outfits exist
+		expectedOutfits := []Pair[string]{
+			{First: "N", Second: "BK"},
+			{First: "N", Second: "BN"},
+			{First: "M", Second: "BK"},
+			{First: "M", Second: "BN"},
+			{First: "W", Second: "BK"},
+			{First: "W", Second: "BN"},
+		}
+
+		for _, outfit := range expectedOutfits {
+			if !outfits.Contains(outfit) {
+				t.Errorf("Missing outfit: %v", outfit)
+			}
+		}
+	})
+}

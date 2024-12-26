@@ -1,65 +1,33 @@
+// Package set provides a generic set data interface and implementations of this interface.
+//
+// The interface is based on the mathematical definition of a set and provides a wide range of operations on sets.
+// The package also provides a map-based in-memory implementation of the Set interface called hashSet.
 package set
 
+// Set is a generic interface that defines the operations that can be performed on a set.
+// A set is defined an unordered collection of unique, arbitrary elements.
+// The zero value of a set is an empty set.
+//
+// The CartesianProduct and PowerSet functions are also separately provided in this package.
 type Set[T comparable] interface {
 	Insert(elem T)
-	Intersection(other Set[T]) Set[T]
+	Remove(elem T)
+	Contains(elem T) bool
+
+	Cardinality() int
+	IsEmpty() bool
+
 	Equals(other Set[T]) bool
-}
+	IsSubsetOf(other Set[T]) bool
+	IsSupersetOf(other Set[T]) bool
+	IsProperSubsetOf(other Set[T]) bool
+	IsProperSupersetOf(other Set[T]) bool
 
-type hashSet[T comparable] struct {
-	elements map[T]struct{}
-}
+	Union(other Set[T]) Set[T]
+	Intersection(other Set[T]) Set[T]
+	Difference(other Set[T]) Set[T]          // A \ B
+	SymmetricDifference(other Set[T]) Set[T] // (A \ B) ∪ (B \ A)
 
-func (h *hashSet[T]) Insert(elem T) {
-	h.elements[elem] = struct{}{}
-}
-
-func (h *hashSet[T]) Intersection(other Set[T]) Set[T] {
-	// Ensure that we are only working with other hash sets
-	otherHashSet, ok := other.(*hashSet[T])
-	if !ok {
-		panic("Intersection only supported between hashSets.")
-	}
-
-	result := NewHashSet[T]()
-
-	var smaller, larger *hashSet[T]
-	if len(h.elements) > len(otherHashSet.elements) {
-		smaller, larger = otherHashSet, h
-	} else {
-		smaller, larger = h, otherHashSet
-	}
-
-	for elem := range smaller.elements {
-		if _, exists := larger.elements[elem]; exists {
-			result.Insert(elem)
-		}
-	}
-
-	return result
-}
-
-func (h *hashSet[T]) Equals(other Set[T]) bool {
-	otherHashSet, ok := other.(*hashSet[T])
-	if !ok {
-		panic("Intersection only supported between hashSets.")
-	}
-
-	if len(h.elements) != len(otherHashSet.elements) {
-		return false
-	}
-
-	for elem := range h.elements {
-		if _, exists := otherHashSet.elements[elem]; !exists {
-			return false
-		}
-	}
-
-	return true
-}
-
-func NewHashSet[T comparable]() Set[T] {
-	return &hashSet[T]{
-		elements: make(map[T]struct{}),
-	}
+	ToSlice() []T
+	String() string
 }
