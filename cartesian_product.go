@@ -15,10 +15,10 @@ func (p Pair[T]) String() string {
 
 // CartesianProduct returns a new set containing all possible ordered pairs
 // (x, y) where x is from the first set and y is from the second set.
-// For sets **A** and **B**, it returns **A** × **B** = {(x, y) | x ∈ **A**, y ∈ **B**}.
+// For sets A and B, it returns A × B = {(x, y) | x ∈ A, y ∈ B}.
 //
-// For example, if **A = {1, 2}** and **B = {3, 4}**, then
-// CartesianProduct(**A**, **B**) = **{(1, 3), (1, 4), (2, 3), (2, 4)}**.
+// For example, if A = {1, 2} and B = {3, 4}, then
+// CartesianProduct(A, B) = {(1, 3), (1, 4), (2, 3), (2, 4)}.
 func CartesianProduct[T comparable](s1, s2 Set[T]) Set[Pair[T]] {
 	result := NewHashSet[Pair[T]]()
 
