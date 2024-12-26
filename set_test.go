@@ -825,20 +825,6 @@ func TestPowerSet(t *testing.T) {
 	}
 }
 
-func TestStringErrorHandling(t *testing.T) {
-	// Test panic recovery when attempting type assertion on non-string type
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("String() with mixed types should panic")
-		}
-	}()
-
-	set := NewHashSet[interface{}]()
-	set.Insert("string")
-	set.Insert(42) // Add non-string element
-	_ = set.String()
-}
-
 func TestTypeAssertionPanics(t *testing.T) {
 	tests := []struct {
 		name string
