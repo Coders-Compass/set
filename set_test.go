@@ -887,3 +887,181 @@ func (m *mockSet[T]) Difference(_ Set[T]) Set[T]          { return nil }
 func (m *mockSet[T]) SymmetricDifference(_ Set[T]) Set[T] { return nil }
 func (m *mockSet[T]) ToSlice() []T                        { return nil }
 func (m *mockSet[T]) String() string                      { return "" }
+
+// Test all operation panics with invalid set types
+func TestOperationPanics(t *testing.T) {
+	tests := []struct {
+		name string
+		fn   func()
+	}{
+		{
+			name: "Union with wrong type",
+			fn: func() {
+				s1 := NewHashSet[int]()
+				var s2 Set[int] = &mockSet[int]{}
+				s1.Union(s2)
+			},
+		},
+		{
+			name: "Intersection with wrong type",
+			fn: func() {
+				s1 := NewHashSet[int]()
+				var s2 Set[int] = &mockSet[int]{}
+				s1.Intersection(s2)
+			},
+		},
+		{
+			name: "Difference with wrong type",
+			fn: func() {
+				s1 := NewHashSet[int]()
+				var s2 Set[int] = &mockSet[int]{}
+				s1.Difference(s2)
+			},
+		},
+		{
+			name: "SymmetricDifference with wrong type",
+			fn: func() {
+				s1 := NewHashSet[int]()
+				var s2 Set[int] = &mockSet[int]{}
+				s1.SymmetricDifference(s2)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r == nil {
+					t.Errorf("%s should panic", tt.name)
+				}
+			}()
+			tt.fn()
+		})
+	}
+}
+
+// Test boundary cases for Contains and Remove
+func TestContainsAndRemoveBoundary(t *testing.T) {
+	set := NewHashSet[int]()
+
+	// Test Contains on empty set
+	if set.Contains(1) {
+		t.Error("Contains should return false for empty set")
+	}
+
+	// Test Remove on empty set
+	set.Remove(1) // Should not panic
+
+	// Test Contains after Remove on non-existent element
+	set.Insert(2)
+	set.Remove(1) // Remove non-existent element
+	if set.Contains(1) {
+		t.Error("Contains should return false after removing non-existent element")
+	}
+
+	// Test multiple Remove calls
+	set.Remove(2)
+	set.Remove(2) // Second remove of same element
+	if set.Contains(2) {
+		t.Error("Contains should return false after multiple removes")
+	}
+}
+
+// Test more Cartesian product cases
+func TestCartesianProductExtended(t *testing.T) {
+	tests := []struct {
+		name      string
+		set1      []int
+		set2      []int
+		wantSize  int
+		wantPairs []Pair[int]
+	}{
+		{
+			name:     "both empty",
+			set1:     []int{},
+			set2:     []int{},
+			wantSize: 0,
+		},
+		{
+			name:     "first empty",
+			set1:     []int{},
+			set2:     []int{1, 2},
+			wantSize: 0,
+		},
+		{
+			name:     "second empty",
+			set1:     []int{1, 2},
+			set2:     []int{},
+			wantSize: 0,
+		},
+		{
+			name:     "single element sets",
+			set1:     []int{1},
+			set2:     []int{2},
+			wantSize: 1,
+			wantPairs: []Pair[int]{
+				{First: 1, Second: 2},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s1 := NewHashSet[int]()
+			s2 := NewHashSet[int]()
+			for _, v := range tt.set1 {
+				s1.Insert(v)
+			}
+			for _, v := range tt.set2 {
+				s2.Insert(v)
+			}
+
+			product := CartesianProduct(s1, s2)
+			if product.Cardinality() != tt.wantSize {
+				t.Errorf("CartesianProduct() got size = %v, want %v",
+					product.Cardinality(), tt.wantSize)
+			}
+
+			for _, pair := range tt.wantPairs {
+				if !product.Contains(pair) {
+					t.Errorf("CartesianProduct() missing pair %v", pair)
+				}
+			}
+		})
+	}
+}
+
+// Test Set operations with mixed element types
+func TestMixedTypeOperations(t *testing.T) {
+	set := NewHashSet[interface{}]()
+	set.Insert(42)
+	set.Insert("hello")
+	set.Insert(3.14)
+
+	// Test Contains with different types
+	if !set.Contains(42) {
+		t.Error("Contains failed for int")
+	}
+	if !set.Contains("hello") {
+		t.Error("Contains failed for string")
+	}
+	if !set.Contains(3.14) {
+		t.Error("Contains failed for float")
+	}
+
+	// Test Remove with different types
+	set.Remove(42)
+	if set.Contains(42) {
+		t.Error("Remove failed for int")
+	}
+
+	set.Remove("hello")
+	if set.Contains("hello") {
+		t.Error("Remove failed for string")
+	}
+
+	// Test Cardinality after mixed operations
+	if set.Cardinality() != 1 {
+		t.Errorf("Cardinality = %d, want 1", set.Cardinality())
+	}
+}
