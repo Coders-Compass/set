@@ -40,37 +40,42 @@ go get -u coderscompass.org/set
 package main
 
 import (
-    "fmt"
-    "coderscompass.org/set"
+	"fmt"
+
+	"coderscompass.org/set"
 )
 
 func main() {
-    // Create sets
-    hobbits := set.NewHashSet[string]()
-    fellowship := set.NewHashSet[string]()
+	// Create sets
+	hobbits := set.NewHashSet[string]()
+	fellowship := set.NewHashSet[string]()
 
-    // Add elements
-    hobbits.Insert("Frodo")
-    hobbits.Insert("Sam")
-    fellowship.Insert("Frodo")
-    fellowship.Insert("Gandalf")
+	// Add elements
+	hobbits.Insert("Frodo")
+	hobbits.Insert("Sam")
+	fellowship.Insert("Frodo")
+	fellowship.Insert("Gandalf")
 
-    // Find intersection
-    hobbitFellows := hobbits.Intersection(fellowship)
+	// Find intersection
+	hobbitFellows := hobbits.Intersection(fellowship)
 
-    // Result contains {"Frodo"}
-    expected := set.NewHashSet[string]()
-    expected.Insert("Frodo")
+	// Result contains {"Frodo"}
+	expected := set.NewHashSet[string]()
+	expected.Insert("Frodo")
 
-    if !hobbitFellows.Equals(expected) {
-        fmt.Println("Expected hobbitFellows to be equal to expected")
-    } else {
-        fmt.Println("hobbitFellows is equal to expected")
-    }
+	if !hobbitFellows.Equals(expected) {
+		fmt.Println("Expected hobbitFellows to be equal to expected")
+	} else {
+		fmt.Println("hobbitFellows is equal to expected")
+	}
 
-    // Advanced operations
-    product := set.CartesianProduct(hobbits, fellowship)
-    powerSet := set.PowerSet(hobbits)
+	// Advanced operations
+	product := set.CartesianProduct(hobbits, fellowship)
+	powerSet := set.PowerSet(hobbits)
+
+	// Print results using implicit string conversion
+	fmt.Println(product)
+	fmt.Println(powerSet)
 }
 ```
 
