@@ -11,11 +11,12 @@
 This package provides a generic interface and an in-memory implementation of finite sets in Go. It serves both as a practical utility and as a teaching tool for understanding set theory concepts through code.
 
 Key features:
-- Generic implementation supporting any comparable type
-- O(1) insertions using hash-based storage
-- Efficient set operations (intersection, equality checking)
-- Comprehensive test coverage
-- Clear documentation connecting theory to implementation
+- Generic implementation supporting any comparable type.
+- O(1) operations using hash-based storage.
+- Complete set theory operations. (union, intersection, difference, etc.)
+- Advanced operations like Cartesian product and power set.
+- Comprehensive test coverage with examples from set theory.
+- Clear documentation connecting mathematical concepts to implementation.
 
 ## Why it's useful
 
@@ -30,7 +31,7 @@ Our set implementation helps you:
 ### Installation
 
 ```bash
-go get coderscompass.org/set
+go get -u coderscompass.org/set
 ```
 
 ### Basic Usage
@@ -39,45 +40,53 @@ go get coderscompass.org/set
 package main
 
 import (
-	"fmt"
-
-	"coderscompass.org/set"
+    "fmt"
+    "coderscompass.org/set"
 )
 
 func main() {
-	// Create sets
-	hobbits := set.NewHashSet[string]()
-	fellowship := set.NewHashSet[string]()
+    // Create sets
+    hobbits := set.NewHashSet[string]()
+    fellowship := set.NewHashSet[string]()
 
-	// Add elements
-	hobbits.Insert("Frodo")
-	hobbits.Insert("Sam")
-	fellowship.Insert("Frodo")
-	fellowship.Insert("Gandalf")
+    // Add elements
+    hobbits.Insert("Frodo")
+    hobbits.Insert("Sam")
+    fellowship.Insert("Frodo")
+    fellowship.Insert("Gandalf")
 
-	// Find intersection
-	hobbitFellows := hobbits.Intersection(fellowship)
-	// Result contains {"Frodo"}
+    // Find intersection
+    hobbitFellows := hobbits.Intersection(fellowship)
 
-	expected := set.NewHashSet[string]()
-	expected.Insert("Frodo")
+    // Result contains {"Frodo"}
+    expected := set.NewHashSet[string]()
+    expected.Insert("Frodo")
 
-	if !hobbitFellows.Equals(expected) {
-		fmt.Println("Expected hobbitFellows to be equal to expected")
-	} else {
-		fmt.Println("hobbitFellows is equal to expected")
-	}
+    if !hobbitFellows.Equals(expected) {
+        fmt.Println("Expected hobbitFellows to be equal to expected")
+    } else {
+        fmt.Println("hobbitFellows is equal to expected")
+    }
+
+    // Advanced operations
+    product := set.CartesianProduct(hobbits, fellowship)
+    powerSet := set.PowerSet(hobbits)
 }
-
 ```
 
 ### Performance Guarantees
 
-| **Operation**    | **Time Complexity** |
-|------------------|---------------------|
-| Insert           | O(1)                |
-| Intersection     | O(m + n)            |
-| Equals           | O(min(n, m))        |
+| Operation          | Time Complexity  |
+|--------------------|------------------|
+| Insert/Remove      | O(1)             |
+| Contains           | O(1)             |
+| Intersection       | O(min(n, m))     |
+| Union              | O(n + m)         |
+| Difference         | O(m)             |
+| Cartesian Product  | O(n × m)         |
+| Power Set          | O(2^n)           |
+
+Here `n` and `m` are the sizes of the two sets involved in the operations.
 
 ## Getting help
 
@@ -89,11 +98,12 @@ func main() {
 ## Project maintenance
 
 ### Current Status
-- Version: v0.1.1
+- Version: v0.2.0
 - Go Version: >= 1.23
 - Maintenance: Active
 
 ### Contributing
+
 We welcome contributions! See our [Contributing Guide](CONTRIBUTING.md) for details on:
 - Code style and standards
 - Development setup
@@ -101,6 +111,7 @@ We welcome contributions! See our [Contributing Guide](CONTRIBUTING.md) for deta
 - Pull request process
 
 ### Security
+
 For security concerns, please review our [Security Policy](SECURITY.md).
 
 ## Learning Resources
