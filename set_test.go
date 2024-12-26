@@ -871,19 +871,19 @@ func TestTypeAssertionPanics(t *testing.T) {
 // mockSet implements Set interface for testing type assertion panics
 type mockSet[T comparable] struct{}
 
-func (m *mockSet[T]) Insert(elem T)                           {}
-func (m *mockSet[T]) Remove(elem T)                           {}
-func (m *mockSet[T]) Contains(elem T) bool                    { return false }
-func (m *mockSet[T]) Cardinality() int                        { return 0 }
-func (m *mockSet[T]) IsEmpty() bool                           { return true }
-func (m *mockSet[T]) Equals(other Set[T]) bool                { return false }
-func (m *mockSet[T]) IsSubsetOf(other Set[T]) bool            { return false }
-func (m *mockSet[T]) IsSupersetOf(other Set[T]) bool          { return false }
-func (m *mockSet[T]) IsProperSubsetOf(other Set[T]) bool      { return false }
-func (m *mockSet[T]) IsProperSupersetOf(other Set[T]) bool    { return false }
-func (m *mockSet[T]) Union(other Set[T]) Set[T]               { return nil }
-func (m *mockSet[T]) Intersection(other Set[T]) Set[T]        { return nil }
-func (m *mockSet[T]) Difference(other Set[T]) Set[T]          { return nil }
-func (m *mockSet[T]) SymmetricDifference(other Set[T]) Set[T] { return nil }
-func (m *mockSet[T]) ToSlice() []T                            { return nil }
-func (m *mockSet[T]) String() string                          { return "" }
+func (m *mockSet[T]) Insert(_ T)                          {}
+func (m *mockSet[T]) Remove(_ T)                          {}
+func (m *mockSet[T]) Contains(_ T) bool                   { return false }
+func (m *mockSet[T]) Cardinality() int                    { return 0 }
+func (m *mockSet[T]) IsEmpty() bool                       { return true }
+func (m *mockSet[T]) Equals(_ Set[T]) bool                { return false }
+func (m *mockSet[T]) IsSubsetOf(_ Set[T]) bool            { return false }
+func (m *mockSet[T]) IsSupersetOf(_ Set[T]) bool          { return false }
+func (m *mockSet[T]) IsProperSubsetOf(_ Set[T]) bool      { return false }
+func (m *mockSet[T]) IsProperSupersetOf(_ Set[T]) bool    { return false }
+func (m *mockSet[T]) Union(_ Set[T]) Set[T]               { return nil }
+func (m *mockSet[T]) Intersection(_ Set[T]) Set[T]        { return nil }
+func (m *mockSet[T]) Difference(_ Set[T]) Set[T]          { return nil }
+func (m *mockSet[T]) SymmetricDifference(_ Set[T]) Set[T] { return nil }
+func (m *mockSet[T]) ToSlice() []T                        { return nil }
+func (m *mockSet[T]) String() string                      { return "" }
