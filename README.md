@@ -103,7 +103,7 @@ Here `n` and `m` are the sizes of the two sets involved in the operations.
 ## Project maintenance
 
 ### Current Status
-- Version: v0.2.0
+- Version: ![GitHub Tag](https://img.shields.io/github/v/tag/Coders-Compass/set)
 - Go Version: >= 1.23
 - Maintenance: Active
 
