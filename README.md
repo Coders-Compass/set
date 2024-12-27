@@ -5,6 +5,8 @@
 [![Go Report Card](https://goreportcard.com/badge/coderscompass.org/set)](https://goreportcard.com/report/coderscompass.org/set)
 [![Security Policy](https://img.shields.io/badge/security-policy-brightgreen.svg)](SECURITY.md)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![License](https://img.shields.io/github/license/Coders-Compass/set)](LICENSE)
+[![Version](https://img.shields.io/github/v/tag/Coders-Compass/set)](https://github.com/Coders-Compass/set/tags)
 
 ## What this project does
 
