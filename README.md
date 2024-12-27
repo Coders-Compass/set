@@ -8,6 +8,10 @@
 [![License](https://img.shields.io/github/license/Coders-Compass/set)](LICENSE)
 [![Version](https://img.shields.io/github/v/tag/Coders-Compass/set)](https://github.com/Coders-Compass/set/tags)
 
+[![Banner for the Set package showing Go's Gopher mascot as a superhero wearing a cape](assets/images/banner.jpeg)](https://coderscompass.org/set)
+
+&copy; [Coders' Compass Publishing](https://coderscompass.org)
+
 ## What this project does
 
 This package provides a generic interface and an in-memory implementation of finite sets in Go. It serves both as a practical utility and as a teaching tool for understanding set theory concepts through code.
