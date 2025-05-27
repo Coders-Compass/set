@@ -126,11 +126,11 @@ func (h *hashSet[T]) IsSupersetOf(other Set[T]) bool {
 }
 
 func (h *hashSet[T]) IsProperSubsetOf(other Set[T]) bool {
-	return h.IsSubsetOf(other) && h.Cardinality() < other.(*hashSet[T]).Cardinality()
+	return h.Cardinality() < other.(*hashSet[T]).Cardinality() && h.IsSubsetOf(other)
 }
 
 func (h *hashSet[T]) IsProperSupersetOf(other Set[T]) bool {
-	return h.IsSupersetOf(other) && h.Cardinality() > other.(*hashSet[T]).Cardinality()
+	return h.Cardinality() > other.(*hashSet[T]).Cardinality() && h.IsSupersetOf(other)
 }
 
 func (h *hashSet[T]) Union(other Set[T]) Set[T] {
