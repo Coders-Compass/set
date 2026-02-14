@@ -25,13 +25,11 @@ jobs:
 
       - name: Install analysis tools
         # Pinned versions — review quarterly and update manually.
-        # gosec:      https://github.com/securego/gosec/releases
-        # nancy:      https://github.com/sonatype-nexus-community/nancy/releases
-        # staticcheck: https://github.com/dominikh/go-tools/releases
+        # gosec: https://github.com/securego/gosec/releases
+        # nancy: https://github.com/sonatype-nexus-community/nancy/releases
         run: |
           go install github.com/securego/gosec/v2/cmd/gosec@v2.23.0
           go install github.com/sonatype-nexus-community/nancy@v1.2.0
-          go install honnef.co/go/tools/cmd/staticcheck@v0.7.0
 
       - name: Verify dependencies
         run: go mod verify
@@ -70,9 +68,6 @@ jobs:
         with:
           version: v2.9.0
           args: --timeout=5m
-
-      - name: Run staticcheck
-        run: staticcheck ./...
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v6
