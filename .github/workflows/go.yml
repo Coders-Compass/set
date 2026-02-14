@@ -75,13 +75,13 @@ jobs:
         run: staticcheck ./...
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: code-coverage-report
           path: coverage.txt
 
       - name: Archive documentation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: documentation
           path: documentation.txt
